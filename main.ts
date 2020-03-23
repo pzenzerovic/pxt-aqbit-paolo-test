@@ -22,12 +22,15 @@ enum BME280_I2C_ADDRESS {
 //% color=#4698CB weight=90 icon="\uf2c8" block="AQ:bit"
 namespace AQbit {
 
+    let request: Buffer = pins.createBuffer(7)
+
     function serialToPMS(): void {
         serial.redirect(
             SerialPin.P1,
             SerialPin.P0,
             BaudRate.BaudRate9600
         )
+        serial.setRxBufferSize(32)
     }
 
     function verifyBytes(response: Buffer): boolean {
@@ -47,26 +50,24 @@ namespace AQbit {
     //% blockId="aqb_pms_pasive" block="put PMS in passive mode"
     export function putPMSInPassiveMode(): void {
         serialToPMS()
-        serial.setRxBufferSize(32)
-        let request = pins.createBuffer(7);
-        request.setNumber(NumberFormat.UInt8LE, 0, 66);
-        request.setNumber(NumberFormat.UInt8LE, 1, 77);
-        request.setNumber(NumberFormat.UInt8LE, 2, 225);
-        request.setNumber(NumberFormat.UInt8LE, 3, 0);
-        request.setNumber(NumberFormat.UInt8LE, 4, 0);
-        request.setNumber(NumberFormat.UInt8LE, 5, 1);
-        request.setNumber(NumberFormat.UInt8LE, 6, 112);
+        request.setNumber(NumberFormat.UInt8LE, 0, 66)
+        request.setNumber(NumberFormat.UInt8LE, 1, 77)
+        request.setNumber(NumberFormat.UInt8LE, 2, 225)
+        request.setNumber(NumberFormat.UInt8LE, 3, 0)
+        request.setNumber(NumberFormat.UInt8LE, 4, 0)
+        request.setNumber(NumberFormat.UInt8LE, 5, 1)
+        request.setNumber(NumberFormat.UInt8LE, 6, 112)
         serial.writeBuffer(request)
         basic.pause(500)
         let response = serial.readBuffer(32)
         if (!verifyBytes(response)) {
-            request.setNumber(NumberFormat.UInt8LE, 0, 66);
-            request.setNumber(NumberFormat.UInt8LE, 1, 77);
-            request.setNumber(NumberFormat.UInt8LE, 2, 225);
-            request.setNumber(NumberFormat.UInt8LE, 3, 0);
-            request.setNumber(NumberFormat.UInt8LE, 4, 0);
-            request.setNumber(NumberFormat.UInt8LE, 5, 1);
-            request.setNumber(NumberFormat.UInt8LE, 6, 112);
+            request.setNumber(NumberFormat.UInt8LE, 0, 66)
+            request.setNumber(NumberFormat.UInt8LE, 1, 77)
+            request.setNumber(NumberFormat.UInt8LE, 2, 225)
+            request.setNumber(NumberFormat.UInt8LE, 3, 0)
+            request.setNumber(NumberFormat.UInt8LE, 4, 0)
+            request.setNumber(NumberFormat.UInt8LE, 5, 1)
+            request.setNumber(NumberFormat.UInt8LE, 6, 112)
             serial.writeBuffer(request)
             basic.pause(500)
         }
@@ -79,28 +80,26 @@ namespace AQbit {
     //% blockId="aqb_read_pms" block="read PMS 2.5"
     export function readPMS(): number {
         serialToPMS()
-        serial.setRxBufferSize(32)
-        let request = pins.createBuffer(7);
-        request.setNumber(NumberFormat.UInt8LE, 0, 66);
-        request.setNumber(NumberFormat.UInt8LE, 1, 77);
-        request.setNumber(NumberFormat.UInt8LE, 2, 226);
-        request.setNumber(NumberFormat.UInt8LE, 3, 0);
-        request.setNumber(NumberFormat.UInt8LE, 4, 0);
-        request.setNumber(NumberFormat.UInt8LE, 5, 1);
-        request.setNumber(NumberFormat.UInt8LE, 6, 113);
+        request.setNumber(NumberFormat.UInt8LE, 0, 66)
+        request.setNumber(NumberFormat.UInt8LE, 1, 77)
+        request.setNumber(NumberFormat.UInt8LE, 2, 226)
+        request.setNumber(NumberFormat.UInt8LE, 3, 0)
+        request.setNumber(NumberFormat.UInt8LE, 4, 0)
+        request.setNumber(NumberFormat.UInt8LE, 5, 1)
+        request.setNumber(NumberFormat.UInt8LE, 6, 113)
         serial.writeBuffer(request)
         basic.pause(1000)
         let response = serial.readBuffer(32)
         if (verifyBytes(response)) {
             return 256 * response[12] + response[13]
         } else {
-            request.setNumber(NumberFormat.UInt8LE, 0, 66);
-            request.setNumber(NumberFormat.UInt8LE, 1, 77);
-            request.setNumber(NumberFormat.UInt8LE, 2, 226);
-            request.setNumber(NumberFormat.UInt8LE, 3, 0);
-            request.setNumber(NumberFormat.UInt8LE, 4, 0);
-            request.setNumber(NumberFormat.UInt8LE, 5, 1);
-            request.setNumber(NumberFormat.UInt8LE, 6, 113);
+            request.setNumber(NumberFormat.UInt8LE, 0, 66)
+            request.setNumber(NumberFormat.UInt8LE, 1, 77)
+            request.setNumber(NumberFormat.UInt8LE, 2, 226)
+            request.setNumber(NumberFormat.UInt8LE, 3, 0)
+            request.setNumber(NumberFormat.UInt8LE, 4, 0)
+            request.setNumber(NumberFormat.UInt8LE, 5, 1)
+            request.setNumber(NumberFormat.UInt8LE, 6, 113)
             serial.writeBuffer(request)
             basic.pause(1000)
             response = serial.readBuffer(32)
@@ -121,7 +120,42 @@ namespace AQbit {
         }
     }
 
-    function executeHttpMethod(method: HttpMethod, host: string, port: number, urlPath: string, headers?: string, body?: string): void {
+    function connectToWiFiBit(): void {
+        serial.redirect(
+            SerialPin.P16,
+            SerialPin.P8,
+            BaudRate.BaudRate115200
+        )
+        basic.pause(100)
+    }
+
+    /**
+     * Connect to WiFi network.
+     * @param ssid SSID, eg: "SSID"
+     * @param key Key, eg: "key"
+     */
+    //% weight=98
+    //% blockId="aqb_wifi_on" block="connect to WiFi network %ssid, %key"
+    export function connectToWiFiNetwork(ssid: string, key: string): void {
+        connectToWiFiBit()
+        writeToSerial("AT+RST", 2000)
+        writeToSerial("AT+CWMODE=1", 5000)
+        writeToSerial("AT+CWJAP=\"" + ssid + "\",\"" + key + "\"", 6000)
+    }
+
+    /**
+     * Execute HTTP method.
+     * @param method HTTP method, eg: HttpMethod.GET
+     * @param host Host, eg: "google.com"
+     * @param port Port, eg: 80
+     * @param urlPath Path, eg: "/search?q=something"
+     * @param headers Headers
+     * @param body Body
+     */
+    //% weight=97
+    //% blockId="aqb_http_method" block="execute HTTP method %method|host: %host|port: %port|path: %urlPath||headers: %headers|body: %body"
+    export function executeHttpMethod(method: HttpMethod, host: string, port: number, urlPath: string, headers?: string, body?: string): void {
+        connectToWiFiBit()
         let myMethod: string
         switch (method) {
             case HttpMethod.GET: myMethod = "GET"; break;
@@ -150,39 +184,15 @@ namespace AQbit {
         writeToSerial("AT+CIPCLOSE", pauseBaseValue * 3)
     }
 
-    function connectToWiFiBit(): void {
-        serial.redirect(
-            SerialPin.P16,
-            SerialPin.P8,
-            BaudRate.BaudRate115200
-        )
-        basic.pause(100)
-    }
-
-    /**
-     * Connect to WiFi network.
-     * @param ssid SSID, eg: "SSID"
-     * @param key Key, eg: "key"
-     */
-    //% weight=98
-    //% blockId="aqb_wifi_on" block="connect to WiFi network %ssid, %key"
-    export function connectToWiFiNetwork(ssid: string, key: string): void {
-        connectToWiFiBit()
-        writeToSerial("AT+RST", 2000)
-        writeToSerial("AT+CWMODE=1", 5000)
-        writeToSerial("AT+CWJAP=\"" + ssid + "\",\"" + key + "\"", 6000)
-    }
-
     /**
      * Write Blynk pin value.
      * @param value Value, eg: "510"
      * @param pin Pin, eg: "A0"
      * @param auth_token Token, eg: "14dabda3551b4dd5ab46464af582f7d2"
      */
-    //% weight=97
+    //% weight=96
     //% blockId="aqb_blynk_write" block="Blynk write %value to %pin, token is %auth_token"
     export function writePinValue(value: string, pin: string, auth_token: string): void {
-        connectToWiFiBit()
         executeHttpMethod(
             HttpMethod.GET,
             "blynk-cloud.com",
@@ -251,7 +261,14 @@ namespace AQbit {
         let var1 = (((adc_T >> 3) - (dig_T1 << 1)) * dig_T2) >> 11
         let var2 = (((((adc_T >> 4) - dig_T1) * ((adc_T >> 4) - dig_T1)) >> 12) * dig_T3) >> 14
         let t = var1 + var2
-        T = Math.idiv((t * 5 + 128) >> 8, 10) / 10
+        T = ((t * 5 + 128) >> 8) / 100
+        if (T > 0 && T - Math.trunc(T) > 0.25 && T - Math.trunc(T) < 0.75) {
+            T = Math.trunc(T) + 0.5
+        } else if (T < 0 && T - Math.trunc(T) < -0.25 && T - Math.trunc(T) > -0.75) {
+            T = Math.trunc(T) - 0.5
+        } else {
+            T = Math.round(T)
+        }
         var1 = (t >> 1) - 64000
         var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * dig_P6
         var2 = var2 + ((var1 * dig_P5) << 1)
@@ -279,18 +296,17 @@ namespace AQbit {
     /**
      * Read BME temperature.
      */
-    //% weight=96
+    //% weight=95
     //% blockId="aqb_read_temperature" block="read BME temperature"
-    export function readBMETemperature(): string {
+    export function readBMETemperature(): number {
         get()
-        let BMET = Math.round(T * 10).toString()
-        return BMET.slice(0, BMET.length - 1) + "." + BMET.slice(BMET.length - 1)
+        return T
     }
 
     /**
      * Read humidity.
      */
-    //% weight=95
+    //% weight=94
     //% blockId="aqb_read_humidity" block="read humidity"
     export function readHumidity(): number {
         get()
@@ -300,7 +316,7 @@ namespace AQbit {
     /**
      * Read pressure.
      */
-    //% weight=94
+    //% weight=93
     //% blockId="aqb_read_pressure" block="read pressure"
     export function readPressure(): number {
         get()
