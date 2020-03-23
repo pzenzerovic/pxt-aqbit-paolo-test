@@ -60,6 +60,13 @@ namespace AQbit {
         basic.pause(500)
         let response = serial.readBuffer(32)
         if (!verifyBytes(response)) {
+            request.setNumber(NumberFormat.UInt8LE, 0, 66);
+            request.setNumber(NumberFormat.UInt8LE, 1, 77);
+            request.setNumber(NumberFormat.UInt8LE, 2, 225);
+            request.setNumber(NumberFormat.UInt8LE, 3, 0);
+            request.setNumber(NumberFormat.UInt8LE, 4, 0);
+            request.setNumber(NumberFormat.UInt8LE, 5, 1);
+            request.setNumber(NumberFormat.UInt8LE, 6, 112);
             serial.writeBuffer(request)
             basic.pause(500)
         }
@@ -85,13 +92,20 @@ namespace AQbit {
         basic.pause(1000)
         let response = serial.readBuffer(32)
         if (verifyBytes(response)) {
-            return response[13]
+            return 256 * response[12] + response[13]
         } else {
+            request.setNumber(NumberFormat.UInt8LE, 0, 66);
+            request.setNumber(NumberFormat.UInt8LE, 1, 77);
+            request.setNumber(NumberFormat.UInt8LE, 2, 226);
+            request.setNumber(NumberFormat.UInt8LE, 3, 0);
+            request.setNumber(NumberFormat.UInt8LE, 4, 0);
+            request.setNumber(NumberFormat.UInt8LE, 5, 1);
+            request.setNumber(NumberFormat.UInt8LE, 6, 113);
             serial.writeBuffer(request)
             basic.pause(1000)
             response = serial.readBuffer(32)
             if (verifyBytes(response)) {
-                return response[13]
+                return 256 * response[12] + response[13]
             } else {
                 return -1
             }
@@ -251,7 +265,7 @@ namespace AQbit {
         _p = Math.idiv(_p, var1) * 2;
         var1 = (dig_P9 * (((_p >> 3) * (_p >> 3)) >> 13)) >> 12
         var2 = (((_p >> 2)) * dig_P8) >> 13
-        P = _p + ((var1 + var2 + dig_P7) >> 4)
+        P = Math.idiv(_p + ((var1 + var2 + dig_P7) >> 4), 100)
         let adc_H = (getreg(0xFD) << 8) + getreg(0xFE)
         var1 = t - 76800
         var2 = (((adc_H << 14) - (dig_H4 << 20) - (dig_H5 * var1)) + 16384) >> 15
@@ -267,9 +281,10 @@ namespace AQbit {
      */
     //% weight=96
     //% blockId="aqb_read_temperature" block="read BME temperature"
-    export function readBMETemperature(): number {
+    export function readBMETemperature(): string {
         get()
-        return T
+        let BMET = Math.round(T * 10).toString()
+        return BMET.slice(0, BMET.length - 1) + "." + BMET.slice(BMET.length - 1)
     }
 
     /**
@@ -289,7 +304,7 @@ namespace AQbit {
     //% blockId="aqb_read_pressure" block="read pressure"
     export function readPressure(): number {
         get()
-        return Math.idiv(P, 100)
+        return P
     }
 
 }
