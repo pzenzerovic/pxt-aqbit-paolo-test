@@ -111,95 +111,6 @@ namespace AQbit {
         }
     }
 
-    let pauseBaseValue: number = 100
-
-    function writeToSerial(data: string, waitTime: number): void {
-        serial.writeString(data + "\u000D" + "\u000A")
-        if (waitTime > 0) {
-            basic.pause(waitTime)
-        }
-    }
-
-    function connectToWiFiBit(): void {
-        serial.redirect(
-            SerialPin.P16,
-            SerialPin.P8,
-            BaudRate.BaudRate115200
-        )
-        basic.pause(100)
-    }
-
-    /**
-     * Connect to WiFi network.
-     * @param ssid SSID, eg: "SSID"
-     * @param key Key, eg: "key"
-     */
-    //% weight=98
-    //% blockId="aqb_wifi_on" block="connect to WiFi network %ssid, %key"
-    export function connectToWiFiNetwork(ssid: string, key: string): void {
-        connectToWiFiBit()
-        writeToSerial("AT+RST", 2000)
-        writeToSerial("AT+CWMODE=1", 5000)
-        writeToSerial("AT+CWJAP=\"" + ssid + "\",\"" + key + "\"", 6000)
-    }
-
-    /**
-     * Execute HTTP method.
-     * @param method HTTP method, eg: HttpMethod.GET
-     * @param host Host, eg: "google.com"
-     * @param port Port, eg: 80
-     * @param urlPath Path, eg: "/search?q=something"
-     * @param headers Headers
-     * @param body Body
-     */
-    //% weight=97
-    //% blockId="aqb_http_method" block="execute HTTP method %method|host: %host|port: %port|path: %urlPath||headers: %headers|body: %body"
-    export function executeHttpMethod(method: HttpMethod, host: string, port: number, urlPath: string, headers?: string, body?: string): void {
-        connectToWiFiBit()
-        let myMethod: string
-        switch (method) {
-            case HttpMethod.GET: myMethod = "GET"; break;
-            case HttpMethod.POST: myMethod = "POST"; break;
-            case HttpMethod.PUT: myMethod = "PUT"; break;
-            case HttpMethod.HEAD: myMethod = "HEAD"; break;
-            case HttpMethod.DELETE: myMethod = "DELETE"; break;
-            case HttpMethod.PATCH: myMethod = "PATCH"; break;
-            case HttpMethod.OPTIONS: myMethod = "OPTIONS"; break;
-            case HttpMethod.CONNECT: myMethod = "CONNECT"; break;
-            case HttpMethod.TRACE: myMethod = "TRACE";
-        }
-        let data: string = "AT+CIPSTART=\"TCP\",\"" + host + "\"," + port
-        writeToSerial(data, pauseBaseValue * 6)
-        data = myMethod + " " + urlPath + " HTTP/1.1" + "\u000D" + "\u000A"
-            + "Host: " + host + "\u000D" + "\u000A"
-        if (headers && headers.length > 0) {
-            data += headers + "\u000D" + "\u000A"
-        }
-        if (data && data.length > 0) {
-            data += "\u000D" + "\u000A" + body + "\u000D" + "\u000A"
-        }
-        data += "\u000D" + "\u000A"
-        writeToSerial("AT+CIPSEND=" + (data.length + 2), pauseBaseValue * 3)
-        writeToSerial(data, pauseBaseValue * 6)
-        writeToSerial("AT+CIPCLOSE", pauseBaseValue * 3)
-    }
-
-    /**
-     * Write Blynk pin value.
-     * @param value Value, eg: "510"
-     * @param pin Pin, eg: "A0"
-     * @param auth_token Token, eg: "14dabda3551b4dd5ab46464af582f7d2"
-     */
-    //% weight=96
-    //% blockId="aqb_blynk_write" block="Blynk write %value to %pin, token is %auth_token"
-    export function writePinValue(value: string, pin: string, auth_token: string): void {
-        executeHttpMethod(
-            HttpMethod.GET,
-            "blynk-cloud.com",
-            80,
-            "/" + auth_token + "/update/" + pin + "?value=" + value
-        )
-    }
 
     let BME280_I2C_ADDR = BME280_I2C_ADDRESS.ADDR_0x76
 
@@ -296,7 +207,7 @@ namespace AQbit {
     /**
      * Read BME temperature.
      */
-    //% weight=95
+    //% weight=98
     //% blockId="aqb_read_temperature" block="read BME temperature"
     export function readBMETemperature(): number {
         get()
@@ -306,7 +217,7 @@ namespace AQbit {
     /**
      * Read humidity.
      */
-    //% weight=94
+    //% weight=97
     //% blockId="aqb_read_humidity" block="read humidity"
     export function readHumidity(): number {
         get()
@@ -316,11 +227,102 @@ namespace AQbit {
     /**
      * Read pressure.
      */
-    //% weight=93
+    //% weight=96
     //% blockId="aqb_read_pressure" block="read pressure"
     export function readPressure(): number {
         get()
         return P
+    }
+
+
+    let pauseBaseValue: number = 100
+
+    function writeToSerial(data: string, waitTime: number): void {
+        serial.writeString(data + "\u000D" + "\u000A")
+        if (waitTime > 0) {
+            basic.pause(waitTime)
+        }
+    }
+
+    function connectToWiFiBit(): void {
+        serial.redirect(
+            SerialPin.P16,
+            SerialPin.P8,
+            BaudRate.BaudRate115200
+        )
+        basic.pause(100)
+    }
+
+    /**
+     * Connect to WiFi network.
+     * @param ssid SSID, eg: "SSID"
+     * @param key Key, eg: "key"
+     */
+    //% weight=95
+    //% blockId="aqb_wifi_on" block="connect to WiFi network %ssid, %key"
+    export function connectToWiFiNetwork(ssid: string, key: string): void {
+        connectToWiFiBit()
+        writeToSerial("AT+RST", 2000)
+        writeToSerial("AT+CWMODE=1", 5000)
+        writeToSerial("AT+CWJAP=\"" + ssid + "\",\"" + key + "\"", 6000)
+    }
+
+    /**
+     * Execute HTTP method.
+     * @param method HTTP method, eg: HttpMethod.GET
+     * @param host Host, eg: "google.com"
+     * @param port Port, eg: 80
+     * @param urlPath Path, eg: "/search?q=something"
+     * @param headers Headers
+     * @param body Body
+     */
+    //% weight=94
+    //% blockId="aqb_http_method" block="execute HTTP method %method|host: %host|port: %port|path: %urlPath||headers: %headers|body: %body"
+    export function executeHttpMethod(method: HttpMethod, host: string, port: number, urlPath: string, headers?: string, body?: string): void {
+        connectToWiFiBit()
+        let myMethod: string
+        switch (method) {
+            case HttpMethod.GET: myMethod = "GET"; break;
+            case HttpMethod.POST: myMethod = "POST"; break;
+            case HttpMethod.PUT: myMethod = "PUT"; break;
+            case HttpMethod.HEAD: myMethod = "HEAD"; break;
+            case HttpMethod.DELETE: myMethod = "DELETE"; break;
+            case HttpMethod.PATCH: myMethod = "PATCH"; break;
+            case HttpMethod.OPTIONS: myMethod = "OPTIONS"; break;
+            case HttpMethod.CONNECT: myMethod = "CONNECT"; break;
+            case HttpMethod.TRACE: myMethod = "TRACE";
+        }
+        let data: string = "AT+CIPSTART=\"TCP\",\"" + host + "\"," + port
+        writeToSerial(data, pauseBaseValue * 6)
+        data = myMethod + " " + urlPath + " HTTP/1.1" + "\u000D" + "\u000A"
+            + "Host: " + host + "\u000D" + "\u000A"
+        if (headers && headers.length > 0) {
+            data += headers + "\u000D" + "\u000A"
+        }
+        if (data && data.length > 0) {
+            data += "\u000D" + "\u000A" + body + "\u000D" + "\u000A"
+        }
+        data += "\u000D" + "\u000A"
+        writeToSerial("AT+CIPSEND=" + (data.length + 2), pauseBaseValue * 3)
+        writeToSerial(data, pauseBaseValue * 6)
+        writeToSerial("AT+CIPCLOSE", pauseBaseValue * 3)
+    }
+
+    /**
+     * Write Blynk pin value.
+     * @param value Value, eg: "510"
+     * @param pin Pin, eg: "A0"
+     * @param auth_token Token, eg: "14dabda3551b4dd5ab46464af582f7d2"
+     */
+    //% weight=93
+    //% blockId="aqb_blynk_write" block="Blynk write %value to %pin, token is %auth_token"
+    export function writePinValue(value: string, pin: string, auth_token: string): void {
+        executeHttpMethod(
+            HttpMethod.GET,
+            "blynk-cloud.com",
+            80,
+            "/" + auth_token + "/update/" + pin + "?value=" + value
+        )
     }
 
 }
