@@ -28,7 +28,6 @@ namespace AQbit {
             SerialPin.P0,
             BaudRate.BaudRate9600
         )
-        serial.setRxBufferSize(32)
     }
 
     function verifyBytes(response: Buffer): boolean {
@@ -48,26 +47,26 @@ namespace AQbit {
     //% blockId="aqb_pms_pasive" block="put PMS in passive mode"
     export function putPMSInPassiveMode(): void {
         serialToPMS()
-        let pmr: Buffer = pins.createBuffer(7)
-        pmr.setNumber(NumberFormat.UInt8LE, 0, 66)
-        pmr.setNumber(NumberFormat.UInt8LE, 1, 77)
-        pmr.setNumber(NumberFormat.UInt8LE, 2, 225)
-        pmr.setNumber(NumberFormat.UInt8LE, 3, 0)
-        pmr.setNumber(NumberFormat.UInt8LE, 4, 0)
-        pmr.setNumber(NumberFormat.UInt8LE, 5, 1)
-        pmr.setNumber(NumberFormat.UInt8LE, 6, 112)
-        serial.writeBuffer(pmr)
+        let bufferRequest = pins.createBuffer(7)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 0, 66)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 1, 77)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 2, 225)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 3, 0)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 4, 0)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 5, 1)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 6, 112)
+        serial.writeBuffer(bufferRequest)
         basic.pause(500)
-        let response = serial.readBuffer(32)
-        if (!verifyBytes(response)) {
-            pmr.setNumber(NumberFormat.UInt8LE, 0, 66)
-            pmr.setNumber(NumberFormat.UInt8LE, 1, 77)
-            pmr.setNumber(NumberFormat.UInt8LE, 2, 225)
-            pmr.setNumber(NumberFormat.UInt8LE, 3, 0)
-            pmr.setNumber(NumberFormat.UInt8LE, 4, 0)
-            pmr.setNumber(NumberFormat.UInt8LE, 5, 1)
-            pmr.setNumber(NumberFormat.UInt8LE, 6, 112)
-            serial.writeBuffer(pmr)
+        let bufferResponse = serial.readBuffer(32)
+        if (!verifyBytes(bufferResponse)) {
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 0, 66)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 1, 77)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 2, 225)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 3, 0)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 4, 0)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 5, 1)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 6, 112)
+            serial.writeBuffer(bufferRequest)
             basic.pause(500)
         }
     }
@@ -79,32 +78,32 @@ namespace AQbit {
     //% blockId="aqb_read_pms" block="read PMS 2.5"
     export function readPMS(): number {
         serialToPMS()
-        let rpr: Buffer = pins.createBuffer(7)
-        rpr.setNumber(NumberFormat.UInt8LE, 0, 66)
-        rpr.setNumber(NumberFormat.UInt8LE, 1, 77)
-        rpr.setNumber(NumberFormat.UInt8LE, 2, 226)
-        rpr.setNumber(NumberFormat.UInt8LE, 3, 0)
-        rpr.setNumber(NumberFormat.UInt8LE, 4, 0)
-        rpr.setNumber(NumberFormat.UInt8LE, 5, 1)
-        rpr.setNumber(NumberFormat.UInt8LE, 6, 113)
-        serial.writeBuffer(rpr)
+        let bufferRequest = pins.createBuffer(7)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 0, 66)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 1, 77)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 2, 226)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 3, 0)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 4, 0)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 5, 1)
+        bufferRequest.setNumber(NumberFormat.UInt8LE, 6, 113)
+        serial.writeBuffer(bufferRequest)
         basic.pause(1000)
-        let response = serial.readBuffer(32)
-        if (verifyBytes(response)) {
-            return 256 * response[12] + response[13]
+        let bufferResponse = serial.readBuffer(32)
+        if (verifyBytes(bufferResponse)) {
+            return 256 * bufferResponse[12] + bufferResponse[13]
         } else {
-            rpr.setNumber(NumberFormat.UInt8LE, 0, 66)
-            rpr.setNumber(NumberFormat.UInt8LE, 1, 77)
-            rpr.setNumber(NumberFormat.UInt8LE, 2, 226)
-            rpr.setNumber(NumberFormat.UInt8LE, 3, 0)
-            rpr.setNumber(NumberFormat.UInt8LE, 4, 0)
-            rpr.setNumber(NumberFormat.UInt8LE, 5, 1)
-            rpr.setNumber(NumberFormat.UInt8LE, 6, 113)
-            serial.writeBuffer(rpr)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 0, 66)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 1, 77)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 2, 226)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 3, 0)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 4, 0)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 5, 1)
+            bufferRequest.setNumber(NumberFormat.UInt8LE, 6, 113)
+            serial.writeBuffer(bufferRequest)
             basic.pause(1000)
-            response = serial.readBuffer(32)
-            if (verifyBytes(response)) {
-                return 256 * response[12] + response[13]
+            bufferResponse = serial.readBuffer(32)
+            if (verifyBytes(bufferResponse)) {
+                return 256 * bufferResponse[12] + bufferResponse[13]
             } else {
                 return -1
             }
