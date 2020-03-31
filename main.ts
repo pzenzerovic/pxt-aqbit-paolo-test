@@ -22,6 +22,9 @@ enum BME280_I2C_ADDRESS {
 //% color=#4698CB weight=90 icon="\uf2c8" block="AQ:bit"
 namespace AQbit {
 
+    let watchdogIsActive = false
+    let watchdogRunTime = input.runningTime()
+
     function serialToPMS(): void {
         serial.redirect(
             SerialPin.P1,
@@ -46,6 +49,8 @@ namespace AQbit {
     //% weight=100
     //% blockId="aqb_pms_pasive" block="put PMS in passive mode"
     export function putPMSInPassiveMode(): void {
+        watchdogIsActive = true
+        watchdogRunTime = input.runningTime()
         basic.clearScreen()
         led.plot(0, 0)
         serialToPMS()
@@ -72,6 +77,7 @@ namespace AQbit {
             led.plot(3, 1)
             basic.pause(500)
         }
+        watchdogIsActive = false
     }
 
     /**
@@ -80,6 +86,8 @@ namespace AQbit {
     //% weight=99
     //% blockId="aqb_read_pms" block="read PMS 2.5"
     export function readPMS(): number {
+        watchdogIsActive = true
+        watchdogRunTime = input.runningTime()
         basic.clearScreen()
         led.plot(0, 1)
         serialToPMS()
@@ -126,6 +134,7 @@ namespace AQbit {
                 return -1
             }
         }
+        watchdogIsActive = false
     }
 
 
@@ -340,6 +349,22 @@ namespace AQbit {
             80,
             "/" + auth_token + "/update/" + pin + "?value=" + value
         )
+    }
+
+    /**
+     * Prevent sensor blocking.
+     */
+    //% weight=92
+    //% blockId="aqb_watchdog" block="prevent sensor blocking"
+    export function preventSensorBlocking(): void {
+        control.inBackground(function () {
+            while (true) {
+                if (watchdogIsActive && ((input.runningTime() - watchdogRunTime) > 3000)) {
+                    control.reset()
+                }
+                basic.pause(100)
+            }
+        })
     }
 
 }
