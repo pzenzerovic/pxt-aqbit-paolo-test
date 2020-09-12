@@ -49,16 +49,13 @@ namespace AQbit {
     //% weight=100
     //% blockId="aqb_pms_pasive" block="put PMS in passive mode"
     export function putPMSInPassiveMode(): void {
+        pins.digitalWritePin(DigitalPin.P13, 1)
         watchdogIsActive = true
         watchdogRunTime = input.runningTime()
         basic.clearScreen()
-        led.plot(0, 0)
         serialToPMS()
-        led.plot(2, 0)
         serial.setRxBufferSize(32)
-        led.plot(2, 1)
         let request = pins.createBuffer(7);
-        led.plot(2, 2)
         request.setNumber(NumberFormat.UInt8LE, 0, 66);
         request.setNumber(NumberFormat.UInt8LE, 1, 77);
         request.setNumber(NumberFormat.UInt8LE, 2, 225);
@@ -66,15 +63,11 @@ namespace AQbit {
         request.setNumber(NumberFormat.UInt8LE, 4, 0);
         request.setNumber(NumberFormat.UInt8LE, 5, 1);
         request.setNumber(NumberFormat.UInt8LE, 6, 112);
-        led.plot(2, 3)
         serial.writeBuffer(request)
-        led.plot(2, 4)
         basic.pause(500)
         let response = serial.readBuffer(32)
-        led.plot(3, 0)
         if (!verifyBytes(response)) {
             serial.writeBuffer(request)
-            led.plot(3, 1)
             basic.pause(500)
         }
         watchdogIsActive = false
@@ -89,13 +82,9 @@ namespace AQbit {
         watchdogIsActive = true
         watchdogRunTime = input.runningTime()
         basic.clearScreen()
-        led.plot(0, 1)
         serialToPMS()
-        led.plot(2, 0)
         serial.setRxBufferSize(32)
-        led.plot(2, 1)
         let request = pins.createBuffer(7);
-        led.plot(2, 2)
         request.setNumber(NumberFormat.UInt8LE, 0, 66);
         request.setNumber(NumberFormat.UInt8LE, 1, 77);
         request.setNumber(NumberFormat.UInt8LE, 2, 226);
@@ -103,14 +92,10 @@ namespace AQbit {
         request.setNumber(NumberFormat.UInt8LE, 4, 0);
         request.setNumber(NumberFormat.UInt8LE, 5, 1);
         request.setNumber(NumberFormat.UInt8LE, 6, 113);
-        led.plot(2, 3)
         serial.writeBuffer(request)
-        led.plot(2, 4)
         basic.pause(1000)
         let response = serial.readBuffer(32)
-        led.plot(3, 0)
         if (verifyBytes(response)) {
-            led.plot(3, 1)
             return response[13]
         } else {
             request.setNumber(NumberFormat.UInt8LE, 0, 66);
@@ -120,17 +105,12 @@ namespace AQbit {
             request.setNumber(NumberFormat.UInt8LE, 4, 0);
             request.setNumber(NumberFormat.UInt8LE, 5, 1);
             request.setNumber(NumberFormat.UInt8LE, 6, 113);
-            led.plot(3, 2)
             serial.writeBuffer(request)
-            led.plot(3, 3)
             basic.pause(1000)
             response = serial.readBuffer(32)
-            led.plot(3, 4)
             if (verifyBytes(response)) {
-                led.plot(4, 0)
                 return response[13]
             } else {
-                led.plot(4, 1)
                 return -1
             }
         }
@@ -293,6 +273,7 @@ namespace AQbit {
         writeToSerial("AT+CWJAP=\"" + ssid + "\",\"" + key + "\"", 6000)
     }
 
+/*
     /**
      * Execute HTTP method.
      * @param method HTTP method, eg: HttpMethod.GET
@@ -304,7 +285,7 @@ namespace AQbit {
      */
     //% weight=94
     //% blockId="aqb_http_method" block="execute HTTP method %method|host: %host|port: %port|path: %urlPath||headers: %headers|body: %body"
-    export function executeHttpMethod(method: HttpMethod, host: string, port: number, urlPath: string, headers?: string, body?: string): void {
+    function executeHttpMethod(method: HttpMethod, host: string, port: number, urlPath: string, headers?: string, body?: string): void {
         connectToWiFiBit()
         let myMethod: string
         switch (method) {
@@ -342,7 +323,7 @@ namespace AQbit {
      */
     //% weight=93
     //% blockId="aqb_blynk_write" block="Blynk write %value to %pin, token is %auth_token"
-    export function writePinValue(value: string, pin: string, auth_token: string): void {
+    function writePinValue(value: string, pin: string, auth_token: string): void {
         executeHttpMethod(
             HttpMethod.GET,
             "blynk-cloud.com",
@@ -352,9 +333,28 @@ namespace AQbit {
     }
 
     /**
-     * Prevent sensor blocking.
+     * Write Blynk pin value.
+     * @param temperature Temperature, eg: 21.5
+     * @param pressure Pressure, eg: 1024
+     * @param humidity Humidity, eg: 52
+     * @param PM Particulate matter, eg: 100
+     * @param token Token, eg: "f58Xf7d2"
      */
     //% weight=92
+    //% blockId="aqb_send_data" block="send data|temperature %temperature|pressure %pressure|humidity %humidity|PM %PM|token %token"
+    export function sendData(temperature: number, pressure: number, humidity: number, PM: number, token: string): void {
+        executeHttpMethod(
+            HttpMethod.GET,
+            "134.209.242.221",
+            80,
+            "/communicate/?temperature=" + Math.trunc(temperature) + "&humidity=" + humidity + "&pressure=" + pressure + "&pm=" + PM + "&token=" + token
+        )
+    }
+
+    /**
+     * Prevent sensor blocking.
+     */
+    //% weight=91
     //% blockId="aqb_watchdog" block="prevent sensor blocking"
     export function preventSensorBlocking(): void {
         control.inBackground(function () {
