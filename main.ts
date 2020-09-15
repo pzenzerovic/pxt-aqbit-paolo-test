@@ -50,8 +50,8 @@ namespace AQbit {
     //% blockId="aqb_pms_pasive" block="put PMS in passive mode"
     export function putPMSInPassiveMode(): void {
         pins.digitalWritePin(DigitalPin.P13, 1)
-        watchdogIsActive = true
         watchdogRunTime = input.runningTime()
+        watchdogIsActive = true
         basic.clearScreen()
         serialToPMS()
         serial.setRxBufferSize(32)
@@ -79,8 +79,8 @@ namespace AQbit {
     //% weight=99
     //% blockId="aqb_read_pms" block="read PMS 2.5"
     export function readPMS(): number {
-        watchdogIsActive = true
         watchdogRunTime = input.runningTime()
+        watchdogIsActive = true
         basic.clearScreen()
         serialToPMS()
         serial.setRxBufferSize(32)
