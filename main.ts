@@ -361,7 +361,7 @@ namespace AQbit {
                 if (watchdogIsActive && ((input.runningTime() - watchdogRunTime) > 20000)) {
                     control.reset()
                 }
-                basic.pause(100)
+                basic.pause(1000)
         }
     }
 
