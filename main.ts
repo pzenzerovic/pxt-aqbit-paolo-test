@@ -357,14 +357,12 @@ namespace AQbit {
     //% weight=91
     //% blockId="aqb_watchdog" block="prevent sensor blocking"
     export function preventSensorBlocking(): void {
-        control.inBackground(function () {
-            while (true) {
+        while (true) {
                 if (watchdogIsActive && ((input.runningTime() - watchdogRunTime) > 20000)) {
                     control.reset()
                 }
                 basic.pause(100)
-            }
-        })
+        }
     }
 
 }
