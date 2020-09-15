@@ -96,6 +96,7 @@ namespace AQbit {
         basic.pause(1000)
         let response = serial.readBuffer(32)
         if (verifyBytes(response)) {
+            watchdogIsActive = false
             return response[13]
         } else {
             request.setNumber(NumberFormat.UInt8LE, 0, 66);
@@ -109,8 +110,10 @@ namespace AQbit {
             basic.pause(1000)
             response = serial.readBuffer(32)
             if (verifyBytes(response)) {
+                watchdogIsActive = false
                 return response[13]
             } else {
+                watchdogIsActive = false
                 return -1
             }
         }
@@ -361,7 +364,7 @@ namespace AQbit {
                 if (watchdogIsActive && ((input.runningTime() - watchdogRunTime) > 20000)) {
                     control.reset()
                 }
-                basic.pause(1000)
+                basic.pause(100)
         }
     }
 
