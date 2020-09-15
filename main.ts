@@ -217,7 +217,7 @@ namespace AQbit {
     //% blockId="aqb_read_temperature" block="read BME temperature"
     export function readBMETemperature(): number {
         get()
-        return T
+        return T - 2
     }
 
     /**
@@ -337,7 +337,7 @@ namespace AQbit {
      * @param temperature Temperature, eg: 21.5
      * @param pressure Pressure, eg: 1024
      * @param humidity Humidity, eg: 52
-     * @param PM Particulate matter, eg: 100
+     * @param PM Particulate matter, eg: 10
      * @param token Token, eg: "f58Xf7d2"
      */
     //% weight=92
